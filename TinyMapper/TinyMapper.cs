@@ -24,6 +24,11 @@ namespace Nelibur.ObjectMapper
             _config = new TinyMapperConfig(_targetMapperBuilder);
         }
 
+        public static int MapperCount
+        {
+            get { return Mappers.Count; }
+        }
+
         [Conditional("XDEBUG")]
         public static void Save()
         {
@@ -143,13 +148,24 @@ namespace Nelibur.ObjectMapper
 
         #region MapCore
 
+        private static long GetKey(object instance)
+        {
+            if (instance == null)
+                return 0;
+            Type type = instance.GetType();
+            long thash = (long)type.GetHashCode() << 32;
+            var objHash = instance.GetHashCode();
+            return thash ^ objHash;
+        }
+
         internal static TTarget MapCore<TSource, TTarget>(TSource source, TTarget target = default(TTarget))
         {
             if (source == null)
             {
                 return default(TTarget);
             }
-            var key = typeof(TSource).GetHashCode() ^ source.GetHashCode();
+
+            var key = GetKey(source);
             TTarget rst;
             var flag = MapperCache.TryGet(key, out rst);
             if (flag)
@@ -181,7 +197,7 @@ namespace Nelibur.ObjectMapper
             }
 
             var sourceType = source.GetType();
-            var key = sourceType.GetHashCode() ^ source.GetHashCode();
+            var key = GetKey(source);
 
             TTarget rst;
             var flag = MapperCache.TryGet(key, out rst);
@@ -211,7 +227,7 @@ namespace Nelibur.ObjectMapper
             var list = new List<TTarget>();
             foreach (TSource item in source)
             {
-                var key = typeof(TSource).GetHashCode() ^ item.GetHashCode();
+                var key = GetKey(item);
                 TTarget rst;
                 var flag = MapperCache.TryGet(key, out rst);
                 if (flag)

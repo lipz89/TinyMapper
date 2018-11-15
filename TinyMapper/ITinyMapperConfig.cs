@@ -24,6 +24,11 @@ namespace Nelibur.ObjectMapper
         /// <param name="nameMatching">Function to match names</param>
         void NameMatching(Func<string, string, bool> nameMatching);
 
+        /// <summary>
+        /// 全局忽略属性
+        /// </summary>
+        /// <param name="member"></param>
+        /// <typeparam name="T"></typeparam>
         void GlobalIgnore<T>(Expression<Func<T, dynamic>> member);
 
         /// <summary>

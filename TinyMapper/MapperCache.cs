@@ -28,19 +28,16 @@ namespace Nelibur.ObjectMapper
                 }
             }
 
-            private ThreadLocal<IDictionary<int, T>> localDictionary = new ThreadLocal<IDictionary<int, T>>(() => new Dictionary<int, T>());
+            private readonly ThreadLocal<IDictionary<long, T>> localDictionary = new ThreadLocal<IDictionary<long, T>>(() => new Dictionary<long, T>());
 
-            internal IDictionary<int, T> Dictionary
+            internal IDictionary<long, T> Dictionary
             {
                 get { return localDictionary.Value; }
             }
 
-            public void Clear()
+            void IInner.Clear()
             {
-                if (localDictionary != null)
-                {
-                    localDictionary.Value?.Clear();
-                }
+                localDictionary?.Value?.Clear();
             }
         }
 
@@ -50,16 +47,16 @@ namespace Nelibur.ObjectMapper
         {
             foreach (var inner in Inners)
             {
-                inner.Clear();
+                inner?.Clear();
             }
         }
 
-        internal static bool TryGet<T>(int key, out T t)
+        internal static bool TryGet<T>(long key, out T t)
         {
             return Inner<T>.Instance.Dictionary.TryGetValue(key, out t);
         }
 
-        internal static void Set<T>(int key, T t)
+        internal static void Set<T>(long key, T t)
         {
             if (!Inner<T>.Instance.Dictionary.ContainsKey(key))
             {
@@ -67,7 +64,7 @@ namespace Nelibur.ObjectMapper
             }
         }
 
-        internal static T Get<T>(int key, Func<T> creator)
+        internal static T Get<T>(long key, Func<T> creator)
         {
             if (!Inner<T>.Instance.Dictionary.ContainsKey(key))
             {
